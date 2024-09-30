@@ -36,11 +36,7 @@ async function createShopifyProductWithVariants(product: FormattedProduct, env: 
     }
     // add the other variants
     if (variants.length > 0) {
-
-        console.log('product.variants', product.variants.length)
-        console.log('filteredVariants', variants.length)
-        let variantResponse = await createProductVariants(shopifyProductId, variants, env);
-        console.log('variantResponse', JSON.stringify(variantResponse))
+        await createProductVariants(shopifyProductId, variants, env);
     }
 
     return shopifyProductId;
