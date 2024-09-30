@@ -8,7 +8,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 
-import { FormattedProduct, FormattedVariant, ProductShopifyIdsType } from "./types";
+import { FormattedProduct, ProductShopifyIdsType } from "./types";
 
 const SyncPage: React.FC = () => {
     const [fromDate, setFromDate] = useState<string>(new Date().toISOString().split('T')[0]);
@@ -29,7 +29,7 @@ const SyncPage: React.FC = () => {
         setIsLoading(true);
         setError(null);
         try {
-            const response = await fetch(`http://localhost:8787/fetch-products?fromDate=${fromDate}&toDate=${toDate}`);
+            const response = await fetch(`/fetch-new-magento-products?fromDate=${fromDate}&toDate=${toDate}`);
             if (!response.ok) {
                 throw new Error('Failed to fetch products from Magento');
             }
@@ -64,7 +64,7 @@ const SyncPage: React.FC = () => {
         setError(null);
         try {
             const productsToCreate = products.filter((_, index) => selectedProducts.includes(index.toString()));
-            const response = await fetch('http://localhost:43759/create-shopify-products', {
+            const response = await fetch('/create-shopify-products', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -85,7 +85,7 @@ const SyncPage: React.FC = () => {
     };
 
     const findShopifyProducts = async (productTitles: string[]) => {
-        const response = await fetch('http://localhost:43759/find-shopify-products', {
+        const response = await fetch('/find-shopify-products', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
