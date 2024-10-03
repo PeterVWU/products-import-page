@@ -10,8 +10,17 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 
 import { FormattedProduct, ProductShopifyIdsType } from "./types";
 
+
+// Utility function to get yesterday's date
+const getYesterday = () => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    return yesterday.toISOString().split('T')[0];
+};
+
+
 const SyncPage: React.FC = () => {
-    const [fromDate, setFromDate] = useState<string>(new Date().toISOString().split('T')[0]);
+    const [fromDate, setFromDate] = useState<string>(getYesterday());
     const [toDate, setToDate] = useState<string>(new Date().toISOString().split('T')[0]);
     const [products, setProducts] = useState<FormattedProduct[]>([]);
     const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
