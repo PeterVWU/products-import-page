@@ -56,7 +56,7 @@ function formatProduct(product: MagentoConfigurableProduct, variants: MagentoSim
     const brand = product.custom_attributes.find(attr => attr.attribute_code === 'brand')?.value
     const vendor = attributeMaps.codeToOptions.get('brand')?.find(brandObj => brandObj.value == brand)?.label || ''
     return {
-        title: "test " + product.name,
+        title: product.name,
         sku: product.sku,
         vendor: vendor,
         descriptionHtml: product.custom_attributes.find(attr => attr.attribute_code === 'description')?.value as string || '',
@@ -257,6 +257,18 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
         const data: MagentoResponse = await response.json();
         console.log('Received data from Magento API');
         const allProducts = data.items.filter(product => product.status == 1)
+        if (allProducts.length === 0) {
+            return new Response(JSON.stringify(
+                {
+                    products: [],
+                    total_count: 0,
+                    from_date: fromDate,
+                    to_date: toDate,
+                    org: data
+                }), {
+                headers: { 'Content-Type': 'application/json' },
+            });
+        }
         // const configurableProducts = data.items.filter(isConfigurableProduct);
         // console.log('configurableProducts', configurableProducts.length)
         const simpleProducts = allProducts.filter(product => !isConfigurableProduct(product)) as MagentoSimpleProduct[];

@@ -107,7 +107,7 @@ async function createProduct(product: FormattedProduct, env: Env): Promise<{ sho
 
     const productVariables = {
         input: {
-            title: "test " + product.title,
+            title: product.title,
             descriptionHtml: product.descriptionHtml,
             vendor: product.vendor,
             productType: product.productType,
