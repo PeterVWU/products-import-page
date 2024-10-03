@@ -11,17 +11,12 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { FormattedProduct, ProductShopifyIdsType } from "./types";
 
 
-// Utility function to get yesterday's date
-const getYesterday = () => {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    return yesterday.toISOString().split('T')[0];
-};
-
+// Utility function to get today's date in YYYY-MM-DD format
+const getTodayDate = () => new Date().toISOString().split('T')[0];
 
 const SyncPage: React.FC = () => {
-    const [fromDate, setFromDate] = useState<string>(getYesterday());
-    const [toDate, setToDate] = useState<string>(new Date().toISOString().split('T')[0]);
+    const [fromDate, setFromDate] = useState<string>(getTodayDate());
+    const [toDate, setToDate] = useState<string>(getTodayDate());
     const [products, setProducts] = useState<FormattedProduct[]>([]);
     const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -38,7 +33,8 @@ const SyncPage: React.FC = () => {
         setIsLoading(true);
         setError(null);
         try {
-            const response = await fetch(`/fetch-new-magento-products?fromDate=${fromDate}&toDate=${toDate}`);
+            const datePram = fromDate != toDate ? `?fromDate=${fromDate}&toDate=${toDate}` : `?toDate=${toDate}`
+            const response = await fetch(`/fetch-new-magento-products${datePram}`);
             if (!response.ok) {
                 throw new Error('Failed to fetch products from Magento');
             }

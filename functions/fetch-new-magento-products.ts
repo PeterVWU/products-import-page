@@ -219,9 +219,9 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
             fromDate = date.toISOString().split('T')[0];
             toDate = new Date().toISOString().split('T')[0];
         } else if (!fromDate && toDate) {
-            // If only toDate is provided, set fromDate to 30 days before toDate
+            // If only toDate is provided, set fromDate to 1 day before
             const date = new Date(toDate);
-            date.setDate(date.getDate() - 30);
+            date.setDate(date.getDate() - 1);
             fromDate = date.toISOString().split('T')[0];
         } else if (!toDate) {
             // If only fromDate is provided, set toDate to current date
