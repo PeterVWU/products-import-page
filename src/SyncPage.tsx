@@ -13,6 +13,7 @@ import { FormattedProduct, ProductShopifyIdsType } from "./types";
 
 // Utility function to get today's date in YYYY-MM-DD format
 const getTodayDate = () => new Date().toISOString().split('T')[0];
+const domain = "http://localhost:8788"
 
 const SyncPage: React.FC = () => {
     const [fromDate, setFromDate] = useState<string>(getTodayDate());
@@ -34,7 +35,7 @@ const SyncPage: React.FC = () => {
         setError(null);
         try {
             const datePram = fromDate != toDate ? `?fromDate=${fromDate}&toDate=${toDate}` : `?toDate=${toDate}`
-            const response = await fetch(`/fetch-new-magento-products${datePram}`);
+            const response = await fetch(`${domain}/fetch-new-magento-products${datePram}`);
             if (!response.ok) {
                 throw new Error('Failed to fetch products from Magento');
             }
@@ -69,7 +70,7 @@ const SyncPage: React.FC = () => {
         setError(null);
         try {
             const productsToCreate = products.filter((_, index) => selectedProducts.includes(index.toString()));
-            const response = await fetch('/create-shopify-products', {
+            const response = await fetch(`${domain}/create-shopify-products`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -90,20 +91,22 @@ const SyncPage: React.FC = () => {
     };
 
     const findShopifyProducts = async (productTitles: string[]) => {
-        const response = await fetch('/find-shopify-products', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ productTitles: productTitles }),
-        })
+        console.log('productTitles', productTitles)
+        return []
+        // const response = await fetch(`${domain}/find-shopify-products`, {
+        //     method: 'POST',
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //     },
+        //     body: JSON.stringify({ productTitles: productTitles }),
+        // })
 
-        if (!response.ok) {
-            throw new Error('Failed to create products in Shopify');
-        }
-        const data: ProductShopifyIdsType[] = await response.json();
-        console.log('findshopfiyproducts', data)
-        return data
+        // if (!response.ok) {
+        //     throw new Error('Failed to create products in Shopify');
+        // }
+        // const data: ProductShopifyIdsType[] = await response.json();
+        // console.log('findshopfiyproducts', data)
+        // return data
     }
 
     const handleProductSelection = (index: number) => {

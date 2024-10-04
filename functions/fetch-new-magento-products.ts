@@ -208,7 +208,6 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
     try {
         console.log('Fetching attribute metadata...');
         const attributeMaps = await fetchAttributeMetadata(env);
-        console.log('attributeMaps.codeToOptions.get("brand")', attributeMaps.codeToOptions.get('brand'))
         let fromDate = searchParams.get('fromDate');
         let toDate = searchParams.get('toDate');
 
@@ -220,13 +219,14 @@ async function handleRequest(request: Request, env: Env): Promise<Response> {
             toDate = new Date().toISOString().split('T')[0];
         } else if (!fromDate && toDate) {
             // If only toDate is provided, set fromDate to 1 day before
-            const date = new Date(toDate);
-            date.setDate(date.getDate() - 1);
-            fromDate = date.toISOString().split('T')[0];
+            fromDate = toDate;
         } else if (!toDate) {
             // If only fromDate is provided, set toDate to current date
             toDate = new Date().toISOString().split('T')[0];
         }
+        // format date for Magento
+        fromDate += ' 00:00:00'
+        toDate += ' 23:59:59'
 
         console.log('Fetching products...');
         const productsUrl = `${env.MAGENTO_API_URL}/rest/V1/products?` +
