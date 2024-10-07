@@ -13,7 +13,7 @@ import { FormattedProduct, ProductShopifyIdsType } from "./types";
 
 // Utility function to get today's date in YYYY-MM-DD format
 const getTodayDate = () => new Date().toISOString().split('T')[0];
-const domain = "http://localhost:8788"
+const domain = import.meta.env.PRO ? "" : "http://localhost:8788"
 
 const SyncPage: React.FC = () => {
     const [fromDate, setFromDate] = useState<string>(getTodayDate());
