@@ -1,4 +1,4 @@
-import { FormattedProduct, FormattedVariant, ProductCreateResponse, ShopifyProduct, ShopifyResponse, VariantsBulkCreateResponse } from './types';
+import { FormattedProduct, FormattedVariant, ProductCreateResponse, ShopifyProduct, ShopifyResponse, VariantsBulkCreateResponse, ShopifyMedia, ProductCreateMediaResponse } from './types';
 
 interface Env {
     SHOPIFY_ADMIN_API_URL: string;
@@ -24,33 +24,34 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 async function createShopifyProductWithVariants(product: FormattedProduct, env: Env): Promise<string> {
     let shopifyProductId = product.shopifyProductId;
     let variants = product.variants;
+    let media: ShopifyMedia[] = []
     if (!shopifyProductId) {
         // No product found in Shopify, create new product and images
         // and add product options, update the default variant.
         const createdShopifyProduct = await createProduct(product, env)
         shopifyProductId = createdShopifyProduct.shopifyProductId
         variants = createdShopifyProduct.variants
+        media = createdShopifyProduct.media
     } else {
         // Product already exist in Shopify, just add new images.
-        await createProductMedia(product, env)
+        media = await createProductMedia(product, env)
     }
     // add the other variants
     if (variants.length > 0) {
-        await createProductVariants(shopifyProductId, variants, env);
+        await createProductVariants(shopifyProductId, variants, media, env);
     }
 
     return shopifyProductId;
 }
 
 // add the product image to the product on shopify
-async function createProductMedia(product: FormattedProduct, env: Env): Promise<FormattedProduct> {
+async function createProductMedia(product: FormattedProduct, env: Env): Promise<ShopifyMedia[]> {
     const createProductMediaMutation = `
 		mutation productCreateMedia($media: [CreateMediaInput!]!, $productId: ID!) {
 			productCreateMedia(media: $media, productId: $productId) {
 				media {
+                    id
 					alt
-					mediaContentType
-					status
 				}
 				mediaUserErrors {
 					field
@@ -69,11 +70,11 @@ async function createProductMedia(product: FormattedProduct, env: Env): Promise<
         productId: product.shopifyProductId
     };
 
-    await shopifyRequest<ProductCreateResponse>(createProductMediaMutation, productMediaVariables, env);
-    return product
+    const productMedia = await shopifyRequest<ProductCreateMediaResponse>(createProductMediaMutation, productMediaVariables, env);
+    return productMedia.data.productCreateMedia.media
 }
 
-async function createProduct(product: FormattedProduct, env: Env): Promise<{ shopifyProductId: string, variants: FormattedVariant[] }> {
+async function createProduct(product: FormattedProduct, env: Env): Promise<{ shopifyProductId: string, variants: FormattedVariant[], media: ShopifyMedia[] }> {
     const createProductMutation = `
 	  mutation createProduct($input: ProductInput!, $media: [CreateMediaInput!]) {
 		productCreate(input: $input, media: $media) {
@@ -131,7 +132,6 @@ async function createProduct(product: FormattedProduct, env: Env): Promise<{ sho
     let defaultVariant: FormattedVariant | null = null;
     const filteredVariants = product.variants.filter(variant => {
         const isDefaultVariant = variant.optionValues.every(option => {
-            console.log('createdProduct', createdProduct.variants)
             return createdProduct.variants.nodes[0].selectedOptions.some(o => {
                 return o.name == option.optionName && o.value == option.name
             })
@@ -144,7 +144,7 @@ async function createProduct(product: FormattedProduct, env: Env): Promise<{ sho
     if (defaultVariant) {
         await updateVariant(createdProduct, defaultVariant, env)
     }
-    return { shopifyProductId: createdProduct.id, variants: filteredVariants }
+    return { shopifyProductId: createdProduct.id, variants: filteredVariants, media: createdProduct.media.nodes }
 }
 
 async function updateVariant(product: ShopifyProduct, variant: FormattedVariant, env: Env): Promise<ShopifyResponse<VariantsBulkCreateResponse>> {
@@ -176,6 +176,8 @@ async function updateVariant(product: ShopifyProduct, variant: FormattedVariant,
 		}
 	`;
 
+    const mediaId = product.media.nodes.filter(node => node.alt == variant.media.alt)[0]?.id
+
     const variantVariables = {
         productId: product.id,
         variants: [
@@ -186,16 +188,16 @@ async function updateVariant(product: ShopifyProduct, variant: FormattedVariant,
                 inventoryItem: {
                     sku: variant.inventoryItem.sku,
                     tracked: true
-                }
+                },
+                mediaId
             }
         ]
 
     };
-    console.log('updateVariantsMutation variantVariables', variantVariables)
     return await shopifyRequest<VariantsBulkCreateResponse>(updateVariantsMutation, variantVariables, env);
 }
 
-async function createProductVariants(productId: string, variants: FormattedVariant[], env: Env): Promise<ShopifyResponse<VariantsBulkCreateResponse>> {
+async function createProductVariants(productId: string, variants: FormattedVariant[], media: ShopifyMedia[], env: Env): Promise<ShopifyResponse<VariantsBulkCreateResponse>> {
     const createVariantsMutation = `
 	  mutation createProductVariants($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
 		productVariantsBulkCreate(productId: $productId, variants: $variants) {
@@ -215,15 +217,14 @@ async function createProductVariants(productId: string, variants: FormattedVaria
     const variantVariables = {
         productId,
         variants: variants.map(variant => {
-            return formatVariant(variant)
+            return formatVariant(variant, media)
         }),
     };
-    console.log('variantVariables', variantVariables)
     return await shopifyRequest<VariantsBulkCreateResponse>(createVariantsMutation, variantVariables, env);
 }
-function formatVariant(variant: FormattedVariant): Record<string, any> {
+function formatVariant(variant: FormattedVariant, media: ShopifyMedia[]): Record<string, any> {
     // assgin image to variant
-    // const mediaId = product.media.nodes.filter(node => node.alt === variant.media.alt)[0]?.id
+    const mediaId = media.filter(node => node.alt == variant.media.alt)[0]?.id
     return {
         price: variant.price,
         optionValues: variant.optionValues,
@@ -231,7 +232,7 @@ function formatVariant(variant: FormattedVariant): Record<string, any> {
             sku: variant.inventoryItem.sku,
             tracked: true
         },
-        // mediaId
+        mediaId
     };
 }
 

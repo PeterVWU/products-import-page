@@ -165,11 +165,13 @@ export interface ShopifyProduct {
         }[]
     };
     media: {
-        nodes: {
-            id: string;
-            alt: string;
-        }[]
+        nodes: ShopifyMedia[]
     }
+}
+
+export interface ShopifyMedia {
+    id: string;
+    alt: string;
 }
 
 export interface ShopifyVariant {
@@ -185,13 +187,7 @@ export interface ShopifyError {
 }
 
 export interface ShopifyResponse<T> {
-    data: {
-        productCreate: {
-            product: ShopifyProduct;
-            userErrors: any
-        }
-        products: FindProductsResponse
-    };
+    data: T;
     errors?: ShopifyError[];
     extensions: any;
 }
@@ -210,12 +206,22 @@ export interface VariantsBulkCreateResponse {
     };
 }
 
+export interface ProductCreateMediaResponse {
+    productCreateMedia: {
+        media: ShopifyMedia[],
+        mediaUserErrors: ShopifyError[];
+    }
+}
+
 export interface FindProductsResponse {
-    edges: {
-        node: {
-            id: string,
-            title: string,
-        }
-    }[]
+    products: {
+
+        edges: {
+            node: {
+                id: string,
+                title: string,
+            }
+        }[]
+    }
 
 }

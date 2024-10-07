@@ -38,26 +38,21 @@ function formatProduct(product: MagentoConfigurableProduct, variants: MagentoSim
         })
         return options
     }, [] as { name: string, values: { name: string }[] }[])
-    // const variantsMedia = variants.map(variant => {
-    // 	return {
-    // 		mediaContentType: 'IMAGE' as const,
-    // 		originalSource: `https://vapewholesaleusa.com/media/catalog/product/${variant.media_gallery_entries[0]?.file}`,
-    // 		alt: variant.name,
-    // 	}
-    // });
-    const media = product.media_gallery_entries.map(entry => ({
-        mediaContentType: 'IMAGE' as const,
-        originalSource: `https://vapewholesaleusa.com/media/catalog/product/${entry.file}`,
-        alt: entry.label,
-    }));
+    const variantsMedia = variants.map(variant => {
+        return {
+            mediaContentType: 'IMAGE' as const,
+            originalSource: `https://vapewholesaleusa.com/media/catalog/product/${variant.media_gallery_entries[0]?.file}`,
+            alt: variant.name,
+        }
+    });
     const tags = product.custom_attributes
         .find(attr => attr.attribute_code === 'category_ids')?.value as string[] || [];
 
     const brand = product.custom_attributes.find(attr => attr.attribute_code === 'brand')?.value
     const vendor = attributeMaps.codeToOptions.get('brand')?.find(brandObj => brandObj.value == brand)?.label || ''
     return {
-        title: "test" + product.name,
-        sku: "test" + product.sku,
+        title: product.name,
+        sku: product.sku,
         vendor: vendor,
         descriptionHtml: product.custom_attributes.find(attr => attr.attribute_code === 'description')?.value as string || '',
         productType: product.custom_attributes.find(attr => attr.attribute_code === 'product_type')?.value as string || '',
@@ -65,7 +60,7 @@ function formatProduct(product: MagentoConfigurableProduct, variants: MagentoSim
         status: product.status === 1 ? 'ACTIVE' : 'DRAFT',
         productOptions,
         variants: formattedVariants,
-        media: media,
+        media: variantsMedia,
         metafields: product.custom_attributes.map(attr => ({
             key: attributeMaps.codeToLabel.get(attr.attribute_code) || attr.attribute_code,
             namespace: 'magento_import',
