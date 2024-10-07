@@ -56,8 +56,8 @@ function formatProduct(product: MagentoConfigurableProduct, variants: MagentoSim
     const brand = product.custom_attributes.find(attr => attr.attribute_code === 'brand')?.value
     const vendor = attributeMaps.codeToOptions.get('brand')?.find(brandObj => brandObj.value == brand)?.label || ''
     return {
-        title: product.name,
-        sku: product.sku,
+        title: "test" + product.name,
+        sku: "test" + product.sku,
         vendor: vendor,
         descriptionHtml: product.custom_attributes.find(attr => attr.attribute_code === 'description')?.value as string || '',
         productType: product.custom_attributes.find(attr => attr.attribute_code === 'product_type')?.value as string || '',
