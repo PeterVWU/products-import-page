@@ -107,7 +107,7 @@ async function createProduct(product: FormattedProduct, env: Env): Promise<{ sho
 
     const productVariables = {
         input: {
-            title: product.title,
+            title: "test" + product.title,
             descriptionHtml: product.descriptionHtml,
             vendor: product.vendor,
             productType: product.productType,
@@ -184,7 +184,7 @@ async function updateVariant(product: ShopifyProduct, variant: FormattedVariant,
                 price: variant.price,
                 optionValues: variant.optionValues,
                 inventoryItem: {
-                    sku: variant.inventoryItem.sku,
+                    sku: "test" + variant.inventoryItem.sku,
                     tracked: true
                 }
             }
