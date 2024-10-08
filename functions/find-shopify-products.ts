@@ -3,6 +3,8 @@ import { ShopifyResponse, FindProductsResponse } from './types';
 interface Env {
     SHOPIFY_ADMIN_API_URL: string;
     SHOPIFY_ACCESS_TOKEN: string;
+    SHOPIFY_MISTHUB_ADMIN_API_URL: string;
+    SHOPIFY_MISTHUB_ACCESS_TOKEN: string;
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
@@ -48,11 +50,11 @@ async function findProduct(title: string, env: Env): Promise<any> {
 }
 
 async function shopifyRequest<T>(query: string, variables: Record<string, any>, env: Env): Promise<ShopifyResponse<T>> {
-    const response = await fetch(env.SHOPIFY_ADMIN_API_URL, {
+    const response = await fetch(env.SHOPIFY_MISTHUB_ADMIN_API_URL, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-Shopify-Access-Token': env.SHOPIFY_ACCESS_TOKEN,
+            'X-Shopify-Access-Token': env.SHOPIFY_MISTHUB_ACCESS_TOKEN,
         },
         body: JSON.stringify({ query, variables }),
     });

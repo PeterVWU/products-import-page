@@ -7,6 +7,7 @@ pages_build_output_dir = "./dist"
 [vars]
 MAGENTO_API_URL = "https://vapewholesaleusa.com"
 SHOPIFY_ADMIN_API_URL  = "https://eliquid-com.myshopify.com/admin/api/2024-07/graphql.json"
+SHOPIFY_MISTHUB_ADMIN_API_URL  = "https://misthub.myshopify.com/admin/api/2024-07/graphql.json"
 
 # Automatically place your workloads in an optimal location to minimize latency.
 # If you are running back-end logic in a Worker, running it closer to your back-end infrastructure
