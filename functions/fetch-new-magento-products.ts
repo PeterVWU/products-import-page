@@ -122,7 +122,7 @@ function formatVariant(variant: MagentoSimpleProduct, options: { name: string; v
         mediaContentType: 'IMAGE' as const,
     }
     return {
-        price: variant.price.toString(),
+        price: variant?.price?.toString(),
         inventoryItem: { sku: variant.sku },
         media,
         optionValues: optionValues.map(option => {
